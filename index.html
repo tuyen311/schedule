@@ -1,0 +1,1324 @@
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script><!-- index.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xếp Lịch Phòng Học</title>
+    <script src="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js)"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .header-info {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #20bf6b 0%, #26de81 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(32, 191, 107, 0.4);
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h2 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .subject-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .subject-item {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            cursor: grab;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .subject-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .subject-item:active {
+            cursor: grabbing;
+        }
+
+        .subject-item.dragging {
+            opacity: 0.5;
+            transform: scale(1.05);
+        }
+
+        .custom-subject {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        .custom-subject h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .custom-subject input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+
+        .custom-subject input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .custom-subject .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .schedule-container {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow-x: auto;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            border: 1px solid #e0e0e0;
+            padding: 8px;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .schedule-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .schedule-table th.room-header {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            width: 80px;
+            min-width: 80px;
+        }
+
+        .schedule-table th.shift-header {
+            background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+            font-size: 0.8rem;
+            padding: 6px 4px;
+        }
+
+        .day-header {
+            text-align: center;
+        }
+
+        .day-header .day-name {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .room-cell {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .schedule-cell {
+            min-width: 100px;
+            min-height: 60px;
+            height: 60px;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .schedule-cell:hover {
+            background: #e8f4fd;
+        }
+
+        .schedule-cell.drag-over {
+            background: #c3e6cb;
+            border: 2px dashed #28a745;
+        }
+
+        .schedule-cell.has-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .cell-content {
+            color: white;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 5px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .cell-content .delete-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .cell-content:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .cell-content .delete-btn:hover {
+            background: rgba(255,0,0,0.5);
+        }
+
+        .shifts-row {
+            display: flex;
+        }
+
+        .shifts-row th {
+            flex: 1;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 25px;
+            background: #333;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #20bf6b 0%, #26de81 100%);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+
+            .subject-list {
+                flex-direction: row;
+                flex-wrap: wrap;
+                max-height: none;
+            }
+
+            .subject-item {
+                flex: 1;
+                min-width: 150px;
+            }
+        }
+
+        .legend {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend h3 {
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .stats {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-radius: 8px;
+        }
+
+        .stats h3 {
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>📅 Xếp Lịch Phòng Học</h1>
+                <p class="header-info">14 phòng × 7 ngày × 3 ca = 294 ô lịch</p>
+            </div>
+            <div class="btn-group">
+<input
+    type="file"
+    id="excelImport"
+    accept=".xlsx,.xls"
+    style="display:none"
+    onchange="importClassList(event)">
+
+<button
+    class="btn btn-success"
+    onclick="document.getElementById('excelImport').click()">
+    📥 Import Excel
+<button
+    class="btn btn-primary"
+    onclick="document.getElementById('excelReplace').click()">
+    🔄 Import thay thế
+</button>
+
+<input
+    type="file"
+    id="excelReplace"
+    accept=".xlsx,.xls"
+    style="display:none"
+    onchange="replaceClassList(event)">
+</button>
+    <button class="btn btn-success" onclick="exportToExcel()">
+        📊 Xuất Excel
+    </button>
+
+    <button class="btn btn-primary" onclick="replaceText()">
+        ✏️ Thay thế hàng loạt
+    </button>
+
+    <button class="btn btn-danger" onclick="clearAll()">
+        🗑️ Xóa tất cả
+    </button>
+</div>        </header>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <h2>📚 Môn học</h2>
+<div style="margin-bottom:12px;">
+    <input
+        type="text"
+        id="subjectSearch"
+        placeholder="🔍 Tìm lớp..."
+        oninput="renderSubjects()"
+        style="
+            width:100%;
+            padding:10px;
+            border:1px solid #ddd;
+            border-radius:8px;
+        ">
+</div>
+                <div class="subject-list" id="subjectList">
+                    <!-- Subjects will be loaded here -->
+                </div>
+
+               <div class="custom-subject">
+    <h3>➕ Thêm môn mới</h3>
+
+    <input type="text"
+           id="customSubject"
+           placeholder="Nhập tên môn học...">
+
+    <button class="btn btn-primary"
+            onclick="addCustomSubject()">
+        Thêm môn
+    </button>
+
+    <button class="btn btn-danger"
+            onclick="removeUnusedSubjects()"
+            style="margin-top:10px;">
+        🧹 Dọn môn không dùng
+    </button>
+</div>
+
+                <div class="stats" id="stats">
+                    <h3>📊 Thống kê</h3>
+                    <div class="stat-item">
+                        <span>Ô đã xếp:</span>
+                        <span class="stat-value" id="filledCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Ô trống:</span>
+                        <span class="stat-value" id="emptyCount">294</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Tỷ lệ:</span>
+                        <span class="stat-value" id="percentage">0%</span>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <h3>📝 Hướng dẫn</h3>
+                    <div class="legend-item">• Kéo môn học vào ô lịch</div>
+                    <div class="legend-item">• Click X để xóa môn</div>
+                    <div class="legend-item">• Dữ liệu tự động lưu</div>
+                    <div class="legend-item">• Xuất Excel để chia sẻ</div>
+                </div>
+            </aside>
+
+            <div class="schedule-container">
+                <table class="schedule-table" id="scheduleTable">
+                    <!-- Table will be generated by JavaScript -->
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+const PROGRAM_COLORS = {
+    BC: '#FFD700',   // vàng
+    BD: '#2ecc71',   // xanh lá
+    BB: '#ff69b4',   // hồng
+    S1: '#9b59b6'    // tím
+};
+        const ROOMS = ['D101', 'D102', 'D103', 'D104', 'D201', 'D202', 'D203', 'D204', 'D301', 'D302', 'D303', 'D304', 'D401', 'D402'];
+        const DAYS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
+        const SHIFTS = [
+            { name: 'Ca 1', time: '8h-11h15' },
+            { name: 'Ca 2', time: '12h-15h15' },
+            { name: 'Ca 3', time: '15h30-18h45' }
+        ];
+
+        const DEFAULT_SUBJECTS = [
+            'Toán cao cấp',
+            'Vật lý đại cương',
+            'Hóa học',
+            'Lập trình C++',
+            'Cơ sở dữ liệu',
+            'Mạng máy tính',
+            'Tiếng Anh',
+            'Triết học',
+            'Kinh tế vi mô',
+            'Marketing',
+            'Kế toán',
+            'Thống kê'
+        ];
+
+        // State
+     let scheduleData = {};
+let subjects = [];
+let rowNotes = {};
+let subjectProgramMap = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            renderSubjects();
+            renderScheduleTable();
+            updateStats();
+        });
+
+        // Storage functions
+        function saveData() {
+    localStorage.setItem(
+        'scheduleData',
+        JSON.stringify(scheduleData)
+    );
+
+    localStorage.setItem(
+        'subjects',
+        JSON.stringify(subjects)
+    );
+
+    localStorage.setItem(
+        'rowNotes',
+        JSON.stringify(rowNotes)
+    );
+
+    localStorage.setItem(
+        'subjectProgramMap',
+        JSON.stringify(subjectProgramMap)
+    );
+
+    updateStats();
+}
+
+        function loadData() {
+            const savedSchedule = localStorage.getItem('scheduleData');
+            const savedSubjects = localStorage.getItem('subjects');
+            
+            if (savedSchedule) {
+                scheduleData = JSON.parse(savedSchedule);
+            }
+            
+            if (savedSubjects) {
+                subjects = JSON.parse(savedSubjects);
+            }const savedNotes =
+    localStorage.getItem('rowNotes');
+
+if(savedNotes){
+    rowNotes = JSON.parse(savedNotes);
+}
+const savedProgramMap =
+    localStorage.getItem('subjectProgramMap');
+
+if(savedProgramMap){
+    subjectProgramMap =
+        JSON.parse(savedProgramMap);
+}
+        }
+
+        // Render subjects sidebar
+        function renderSubjects() {
+            const container = document.getElementById('subjectList');
+           const availableSubjects =
+    getAvailableSubjects();
+const keyword =
+    document.getElementById('subjectSearch')
+        ?.value
+        ?.toLowerCase()
+        || '';
+
+container.innerHTML =
+    availableSubjects
+    .filter(subject =>
+        subject.toLowerCase()
+            .includes(keyword)
+    ).map((subject) => `
+                <div class="subject-item"
+     style="
+        background:${
+            PROGRAM_COLORS[
+                subjectProgramMap[subject]
+            ] || '#667eea'
+        };
+     "
+                     draggable="true" 
+                     data-subject="${subject}"
+                     ondragstart="handleDragStart(event)"
+                     ondragend="handleDragEnd(event)">
+                    ${subject}
+                </div>
+            `).join('');
+        }
+function getAvailableSubjects() {
+
+    const usedSubjects = new Set(
+        Object.values(scheduleData)
+    );
+
+    return subjects.filter(subject =>
+        !usedSubjects.has(subject)
+    );
+}
+        function renderScheduleTable() {
+
+    const table = document.getElementById('scheduleTable');
+
+    let html = '<thead><tr>';
+
+    html += '<th class="room-header">Phòng</th>';
+    html += '<th class="shift-header">Ca</th>';
+
+    DAYS.forEach(day=>{
+        html += `<th>${day}</th>`;
+    });
+
+    html += '<th>📝 Ghi chú</th>';
+
+    html += '</tr></thead><tbody>';
+
+    ROOMS.forEach(room=>{
+
+        SHIFTS.forEach((shift,shiftIndex)=>{
+
+            html += '<tr>';
+
+            if(shiftIndex===0){
+                html += `
+                <td class="room-cell" rowspan="3">
+                    ${room}
+                </td>
+                `;
+            }
+
+            html += `
+            <td class="shift-header">
+                ${shift.name}<br>
+                <small>${shift.time}</small>
+            </td>
+            `;
+
+            DAYS.forEach((day,dayIndex)=>{
+
+                const cellId =
+                    `${room}-${dayIndex}-${shiftIndex}`;
+
+                const content =
+                    scheduleData[cellId] || '';
+const stage =
+    subjectProgramMap[content];
+
+const bgColor =
+    PROGRAM_COLORS[stage] ||
+    '#667eea';
+
+                const hasContent =
+                    content ? 'has-content' : '';
+
+                html += `
+                <td class="schedule-cell ${hasContent}"
+                    id="${cellId}"
+                    ondragover="handleDragOver(event)"
+                    ondragleave="handleDragLeave(event)"
+                    ondrop="handleDrop(event)"
+                    onclick="handleCellClick(event,'${cellId}')">
+
+                    ${content ? `
+                        <div class="cell-content"
+     style="
+        background:${bgColor};
+        color:#fff;
+        border-radius:6px;
+     ">
+                            ${content}
+                            <button
+                                class="delete-btn"
+                                onclick="deleteCell(event,'${cellId}')">
+                                ×
+                            </button>
+                        </div>
+                    ` : ''}
+                </td>
+                `;
+            });
+
+            const noteId =
+                `${room}-${shiftIndex}`;
+
+            html += `
+            <td
+                onclick="editNote('${noteId}')"
+                style="
+                    min-width:200px;
+                    background:#fff8dc;
+                    text-align:left;
+                    cursor:pointer;
+                    padding:8px;
+                ">
+                ${rowNotes[noteId] || ''}
+            </td>
+            `;
+
+            html += '</tr>';
+
+        });
+
+    });
+
+    html += '</tbody>';
+
+    table.innerHTML = html;
+}
+        // Drag and drop handlers
+        function handleDragStart(e) {
+            e.target.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', e.target.dataset.subject);
+            e.dataTransfer.effectAllowed = 'copy';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+function getTeacher(subject) {
+
+    if (!subject.includes(' - '))
+        return '';
+
+    const parts = subject.split(' - ');
+
+    return parts.slice(1).join(' - ').trim();
+}
+
+function teacherBusy(teacher, dayIndex, shiftIndex) {
+
+    if (!teacher) return false;
+
+    for (const cellId in scheduleData) {
+
+        const subject = scheduleData[cellId];
+
+        const currentTeacher =
+            getTeacher(subject);
+
+        if (currentTeacher !== teacher)
+            continue;
+
+        const parts = cellId.split('-');
+
+        const cellDay =
+            parseInt(parts[1]);
+
+        const cellShift =
+            parseInt(parts[2]);
+
+        if (
+            cellDay === dayIndex &&
+            cellShift === shiftIndex
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            const subject = e.dataTransfer.getData('text/plain');
+            const cellId = e.currentTarget.id;
+const teacher =
+    getTeacher(subject);
+
+const parts =
+    cellId.split('-');
+
+const dayIndex =
+    parseInt(parts[1]);
+
+const shiftIndex =
+    parseInt(parts[2]);
+
+if (
+    teacherBusy(
+        teacher,
+        dayIndex,
+        shiftIndex
+    )
+) {
+
+    showToast(
+        `⚠ ${teacher} đã có lớp ở ca này`,
+        'error'
+    );
+
+    return;
+}
+            
+            if (subject && cellId) {
+
+    const existedCell = Object.keys(scheduleData)
+        .find(key => scheduleData[key] === subject);
+
+    if (existedCell && existedCell !== cellId) {
+
+        showToast(
+            `⚠ Lớp "${subject}" đã được xếp lịch`,
+            'error'
+        );
+
+        return;
+    }
+
+    scheduleData[cellId] = subject;
+
+    saveData();
+    renderScheduleTable();
+renderSubjects();
+
+    showToast(
+        `Đã thêm "${subject}"`,
+        'success'
+    );
+}
+}
+        // Cell interactions
+        function handleCellClick(e, cellId) {
+            if (e.target.classList.contains('delete-btn')) return;
+            
+            if (!scheduleData[cellId]) {
+                const subject = prompt('Nhập tên môn học:');
+                if (subject && subject.trim()) {
+                    scheduleData[cellId] = subject.trim();
+                    saveData();
+                    renderScheduleTable();
+renderSubjects();
+                    showToast(`Đã thêm "${subject.trim()}"`, 'success');
+                }
+            }
+        }
+
+        function deleteCell(e, cellId) {
+            e.stopPropagation();
+            const subject = scheduleData[cellId];
+            delete scheduleData[cellId];
+            saveData();
+            renderScheduleTable();
+            showToast(`Đã xóa "${subject}"`, 'error');
+        }
+
+        // Add custom subject
+        function addCustomSubject() {
+            const input = document.getElementById('customSubject');
+            const subject = input.value.trim();
+            
+            if (subject && !subjects.includes(subject)) {
+                subjects.push(subject);
+                saveData();
+                renderSubjects();
+                input.value = '';
+                showToast(`Đã thêm môn "${subject}"`, 'success');
+            } else if (subjects.includes(subject)) {
+                showToast('Môn học đã tồn tại!', 'error');
+            }
+        }
+
+        // Clear all
+        function clearAll() {
+            if (confirm('Bạn có chắc muốn xóa tất cả lịch học?')) {
+                scheduleData = {};
+                saveData();
+                renderScheduleTable();
+renderSubjects();
+                showToast('Đã xóa tất cả lịch học', 'error');
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const filled = Object.keys(scheduleData).length;
+            const total = ROOMS.length * DAYS.length * SHIFTS.length;
+            const empty = total - filled;
+            const percentage = Math.round((filled / total) * 100);
+            
+            document.getElementById('filledCount').textContent = filled;
+            document.getElementById('emptyCount').textContent = empty;
+            document.getElementById('percentage').textContent = percentage + '%';
+        }
+function replaceText() {
+
+    const oldText = prompt("Nhập nội dung cần thay:");
+
+    if (!oldText) return;
+
+    const newText = prompt("Nhập nội dung mới:");
+
+    if (!newText) return;
+
+    let count = 0;
+
+    Object.keys(scheduleData).forEach(cellId => {
+
+        if (scheduleData[cellId] === oldText) {
+            scheduleData[cellId] = newText;
+            count++;
+        }
+
+    });
+
+    saveData();
+    renderScheduleTable();
+
+    showToast(`Đã cập nhật ${count} ô`, 'success');
+}
+                function exportToExcel() {
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Prepare data array
+            const data = [];
+            
+            // Header row 1
+            const header1 = ['Phòng'];
+            DAYS.forEach(day => {
+                header1.push(day, '', '');
+            });
+            data.push(header1);
+            
+            // Header row 2
+            const header2 = [''];
+            DAYS.forEach(() => {
+                SHIFTS.forEach(shift => {
+                    header2.push(`${shift.name} (${shift.time})`);
+                });
+            });
+            data.push(header2);
+            
+            // Data rows
+            ROOMS.forEach(room => {
+                const row = [room];
+                DAYS.forEach((day, dayIndex) => {
+                    SHIFTS.forEach((shift, shiftIndex) => {
+                        const cellId = `${room}-${dayIndex}-${shiftIndex}`;
+                        row.push(scheduleData[cellId] || '');
+                    });
+                });
+                data.push(row);
+            });
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            
+            // Set column widths
+            const colWidths = [{ wch: 8 }];
+            for (let i = 0; i < DAYS.length * SHIFTS.length; i++) {
+                colWidths.push({ wch: 15 });
+            }
+            ws['!cols'] = colWidths;
+            
+            // Merge cells for day headers
+            ws['!merges'] = [];
+            DAYS.forEach((_, dayIndex) => {
+                const startCol = 1 + dayIndex * 3;
+                ws['!merges'].push({
+                    s: { r: 0, c: startCol },
+                    e: { r: 0, c: startCol + 2 }
+                });
+            });
+            // =======================
+// SHEET 2 - DANH SÁCH LỚP
+// =======================
+
+const classListData = [
+    ['Mã lớp', 'Giảng viên', 'Phòng', 'Thứ', 'Ca', 'Giờ học']
+];
+
+Object.keys(scheduleData).forEach(cellId => {
+    const subject = scheduleData[cellId];
+
+    if (!subject) return;
+
+    const [room, dayIndex, shiftIndex] = cellId.split('-');
+
+   let maLop = subject;
+let giangVien = '';
+
+if(subject.includes(' - ')){
+    const parts = subject.split(' - ');
+    maLop = parts[0].trim();
+    giangVien = parts.slice(1).join(' - ').trim();
+}
+
+classListData.push([
+    maLop,
+    giangVien,
+    room,
+    DAYS[parseInt(dayIndex)],
+    SHIFTS[parseInt(shiftIndex)].name,
+    SHIFTS[parseInt(shiftIndex)].time
+]);
+});
+
+const wsClassList = XLSX.utils.aoa_to_sheet(classListData);
+
+wsClassList['!cols'] = [
+    { wch: 30 }, // Mã lớp
+    { wch: 10 }, // Phòng
+    { wch: 12 }, // Thứ
+    { wch: 10 }, // Ca
+    { wch: 15 }  // Giờ học
+];
+
+// Thêm sheet vào workbook
+XLSX.utils.book_append_sheet(wb, wsClassList, 'Danh sách lớp');
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'Lịch phòng học');
+            
+            // Generate filename with date
+            const date = new Date();
+            const filename = `Lich_phong_hoc_${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}.xlsx`;
+            
+            // Download
+            XLSX.writeFile(wb, filename);
+            showToast('Đã xuất file Excel!', 'success');
+        }
+function removeUnusedSubjects() {
+
+    if(!confirm(
+        "Xóa tất cả môn học chưa được sử dụng khỏi danh sách?"
+    )) return;
+
+    const usedSubjects = new Set(
+        Object.values(scheduleData)
+    );
+
+    const before = subjects.length;
+
+    subjects = subjects.filter(subject =>
+        usedSubjects.has(subject)
+    );
+
+    saveData();
+    renderSubjects();
+
+    showToast(
+        `🧹 Đã dọn ${before - subjects.length} môn`,
+        'success'
+    );
+}
+function replaceClassList(event) {
+
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+
+        const workbook = XLSX.read(
+            new Uint8Array(e.target.result),
+            { type: 'array' }
+        );
+
+        const sheet =
+            workbook.Sheets[
+                workbook.SheetNames[0]
+            ];
+
+        const rows =
+            XLSX.utils.sheet_to_json(sheet, {
+                header: 1
+            });
+
+        const newSubjects = [];
+        const newProgramMap = {};
+
+        rows.forEach((row, index) => {
+
+            if(index === 0) return;
+
+            const maLop =
+                row[0]?.toString().trim();
+
+            const gv =
+                row[1]?.toString().trim();
+
+            const stage =
+                row[2]?.toString().trim().toUpperCase();
+
+            if(!maLop) return;
+
+            const text = gv
+                ? `${maLop} - ${gv}`
+                : maLop;
+
+            newSubjects.push(text);
+
+            newProgramMap[text] = stage;
+        });
+
+        // thay danh sách lớp
+        subjects = newSubjects;
+
+        // thay stage map
+        subjectProgramMap = newProgramMap;
+
+        // dọn lịch của những lớp không còn tồn tại
+        Object.keys(scheduleData).forEach(cellId => {
+
+            const subject =
+                scheduleData[cellId];
+
+            if(!subjects.includes(subject)){
+
+                delete scheduleData[cellId];
+            }
+        });
+
+        saveData();
+
+        renderSubjects();
+        renderScheduleTable();
+
+        showToast(
+            `🔄 Đã cập nhật ${subjects.length} lớp và giữ nguyên lịch đã xếp`,
+            'success'
+        );
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+function importClassList(event) {
+
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+
+        const workbook = XLSX.read(
+            new Uint8Array(e.target.result),
+            { type: 'array' }
+        );
+
+        const sheet =
+            workbook.Sheets[
+                workbook.SheetNames[0]
+            ];
+
+        const rows =
+            XLSX.utils.sheet_to_json(sheet, {
+                header: 1
+            });
+
+        subjects = [];
+
+        rows.forEach((row, index) => {
+
+            if(index === 0) return;
+
+            const maLop = row[0]?.toString().trim();
+            const gv = row[1]?.toString().trim();
+
+            if(!maLop) return;
+
+            const text = gv
+                ? `${maLop} - ${gv}`
+                : maLop;
+const stage =
+    row[2]?.toString().trim().toUpperCase();
+
+            subjects.push(text);
+ subjectProgramMap[text] = stage;
+
+        });
+
+        saveData();
+        renderSubjects();
+
+        showToast(
+            `📥 Đã import ${subjects.length} lớp`,
+            'success'
+        );
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+        // Toast notification
+       function editNote(noteId){
+
+    const current =
+        rowNotes[noteId] || '';
+
+    const note = prompt(
+        'Nhập ghi chú:',
+        current
+    );
+
+    if(note === null) return;
+
+    rowNotes[noteId] = note;
+
+    saveData();
+
+    renderScheduleTable();
+
+    showToast(
+        'Đã lưu ghi chú',
+        'success'
+    );
+} function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Handle Enter key for custom subject input
+        document.getElementById('customSubject').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addCustomSubject();
+            }
+        });
+    </script>
+</body>
+</html>
