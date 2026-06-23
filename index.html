@@ -630,8 +630,12 @@ async function loadFromCloud(){
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadFromCloud();
-            loadData();
+    await loadFromCloud();
+
+    renderSubjects();
+    renderScheduleTable();
+    updateStats();
+});
             renderSubjects();
             renderScheduleTable();
             updateStats();
@@ -664,20 +668,7 @@ async function loadFromCloud(){
 }
 
         function loadData() {
-            const savedSchedule = localStorage.getItem('scheduleData');
-            const savedSubjects = localStorage.getItem('subjects');
             
-            if (savedSchedule) {
-                scheduleData = JSON.parse(savedSchedule);
-            }
-            
-            if (savedSubjects) {
-                subjects = JSON.parse(savedSubjects);
-            }const savedNotes =
-    localStorage.getItem('rowNotes');
-
-if(savedNotes){
-    rowNotes = JSON.parse(savedNotes);
 }
 const savedProgramMap =
     localStorage.getItem('subjectProgramMap');
