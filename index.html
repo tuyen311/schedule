@@ -955,6 +955,7 @@ if (
     scheduleData[cellId] = subject;
 
     saveData();
+                saveToCloud();
     renderScheduleTable();
 renderSubjects();
 
@@ -973,6 +974,7 @@ renderSubjects();
                 if (subject && subject.trim()) {
                     scheduleData[cellId] = subject.trim();
                     saveData();
+                    saveToCloud();
                     renderScheduleTable();
 renderSubjects();
                     showToast(`Đã thêm "${subject.trim()}"`, 'success');
@@ -985,6 +987,7 @@ renderSubjects();
             const subject = scheduleData[cellId];
             delete scheduleData[cellId];
             saveData();
+            saveToCloud();
             renderScheduleTable();
             showToast(`Đã xóa "${subject}"`, 'error');
         }
@@ -997,6 +1000,7 @@ renderSubjects();
             if (subject && !subjects.includes(subject)) {
                 subjects.push(subject);
                 saveData();
+                saveToCloud();
                 renderSubjects();
                 input.value = '';
                 showToast(`Đã thêm môn "${subject}"`, 'success');
@@ -1010,6 +1014,7 @@ renderSubjects();
             if (confirm('Bạn có chắc muốn xóa tất cả lịch học?')) {
                 scheduleData = {};
                 saveData();
+                saveToCloud();
                 renderScheduleTable();
 renderSubjects();
                 showToast('Đã xóa tất cả lịch học', 'error');
@@ -1049,6 +1054,7 @@ function replaceText() {
     });
 
     saveData();
+    saveToCloud();
     renderScheduleTable();
 
     showToast(`Đã cập nhật ${count} ô`, 'success');
@@ -1181,6 +1187,7 @@ function removeUnusedSubjects() {
     );
 
     saveData();
+    saveToCloud();
     renderSubjects();
 
     showToast(
@@ -1259,6 +1266,7 @@ function replaceClassList(event) {
         });
 
         saveData();
+        saveToCloud();
 
         renderSubjects();
         renderScheduleTable();
@@ -1319,6 +1327,7 @@ const stage =
         });
 
         saveData();
+        saveToCloud();
         renderSubjects();
 
         showToast(
@@ -1345,6 +1354,7 @@ const stage =
     rowNotes[noteId] = note;
 
     saveData();
+        saveToCloud();
 
     renderScheduleTable();
 
