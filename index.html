@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xếp Lịch Phòng Học</title>
-    <script src="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js)"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -591,8 +591,46 @@ window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
+        
+async function saveToCloud(){
+    try{
+        await supabaseClient.from('app_data').upsert({
+            id: 1,
+            data: {
+                scheduleData,
+                subjects,
+                rowNotes,
+                subjectProgramMap
+            }
+        });
+    }catch(err){
+        console.error('saveToCloud', err);
+    }
+}
+
+async function loadFromCloud(){
+    try{
+        const { data } = await supabaseClient
+            .from('app_data')
+            .select('*')
+            .eq('id',1)
+            .single();
+
+        if(data && data.data){
+            scheduleData = data.data.scheduleData || {};
+            subjects = data.data.subjects || [];
+            rowNotes = data.data.rowNotes || {};
+            subjectProgramMap = data.data.subjectProgramMap || {};
+        }
+    }catch(err){
+        console.error('loadFromCloud', err);
+    }
+}
+
+
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadFromCloud();
             loadData();
             renderSubjects();
             renderScheduleTable();
@@ -622,6 +660,7 @@ window.supabase.createClient(
     );
 
     updateStats();
+    saveToCloud();
 }
 
         function loadData() {
