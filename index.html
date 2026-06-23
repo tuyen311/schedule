@@ -580,7 +580,17 @@ const PROGRAM_COLORS = {
 let subjects = [];
 let rowNotes = {};
 let subjectProgramMap = {};
+const SUPABASE_URL =
+'https://ezwsccofgqqahptjxisj.supabase.co';
 
+const SUPABASE_KEY =
+'sb_publishable_bs7AyXQqJnBn6Rm0USzP5A_J5z6uTRC';
+
+const supabase =
+window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
