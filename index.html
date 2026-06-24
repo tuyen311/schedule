@@ -466,7 +466,10 @@
     <button class="btn btn-primary" onclick="replaceText()">
         ✏️ Thay thế hàng loạt
     </button>
-
+<button class="btn btn-primary"
+        onclick="refreshFromCloud()">
+    🔄 Đồng bộ
+</button>
     <button class="btn btn-danger" onclick="clearAll()">
         🗑️ Xóa tất cả
     </button>
@@ -1349,6 +1352,19 @@ const stage =
         'Đã lưu ghi chú',
         'success'
     );
+           async function refreshFromCloud() {
+
+    await loadFromCloud();
+
+    renderScheduleTable();
+    renderSubjects();
+    updateStats();
+
+    showToast(
+        '🔄 Đã tải dữ liệu mới nhất',
+        'success'
+    );
+}
 } function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
@@ -1366,6 +1382,15 @@ const stage =
                 addCustomSubject();
             }
         });
+        setInterval(async () => {
+
+    await loadFromCloud();
+
+    renderScheduleTable();
+    renderSubjects();
+    updateStats();
+
+}, 10000);
     </script>
 </body>
 </html>
