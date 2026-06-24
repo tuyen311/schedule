@@ -628,71 +628,17 @@ async function loadFromCloud(){
     }catch(err){
         console.error('loadFromCloud', err);
     }
-     }
-    async function loadScheduleCells(){
-
-    const { data, error } =
-        await supabaseClient
-            .from('schedule_cells')
-            .select('*');
-
-    if(error){
-        console.error(error);
-        return;
-    }
-
-    scheduleData = {};
-
-    data.forEach(row => {
-
-        scheduleData[row.cell_id] =
-            row.subject;
-
-    });
-
-    renderScheduleTable();
-    renderSubjects();
-    updateStats();
-}
-async function saveCell(cellId, subject){
-
-    const { error } =
-        await supabaseClient
-            .from('schedule_cells')
-            .upsert({
-                cell_id: cellId,
-                subject: subject
-            });
-
-    if(error){
-        console.error(error);
-    }
 }
 
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
-
     await loadFromCloud();
 
-    await loadScheduleCells();
+    renderSubjects();
+    renderScheduleTable();
+    updateStats();
 });
-    supabaseClient
-.channel('schedule-realtime')
-.on(
-    'postgres_changes',
-    {
-        event: '*',
-        schema: 'public',
-        table: 'schedule_cells'
-    },
-    async () => {
-
-        await loadScheduleCells();
-
-    }
-)
-.subscribe();
           
         // Storage functions
         function saveData() {
@@ -947,7 +893,7 @@ function teacherBusy(teacher, dayIndex, shiftIndex) {
     return false;
 }
 
-        async function handleDrop(e) {
+        function handleDrop(e) {
             e.preventDefault();
             e.currentTarget.classList.remove('drag-over');
             
@@ -998,14 +944,10 @@ if (
 
     scheduleData[cellId] = subject;
 
-await saveCell(
-    cellId,
-    subject
-);
-
-renderScheduleTable();
+    saveData();
+                saveToCloud();
+    renderScheduleTable();
 renderSubjects();
-updateStats();
 
     showToast(
         `Đã thêm "${subject}"`,
@@ -1030,19 +972,13 @@ renderSubjects();
             }
         }
 
-        async function deleteCell(e, cellId) {
+        function deleteCell(e, cellId) {
             e.stopPropagation();
             const subject = scheduleData[cellId];
-           delete scheduleData[cellId];
-
-await supabaseClient
-    .from('schedule_cells')
-    .delete()
-    .eq('cell_id', cellId);
-
-renderScheduleTable();
-renderSubjects();
-updateStats();
+            delete scheduleData[cellId];
+            saveData();
+            saveToCloud();
+            renderScheduleTable();
             showToast(`Đã xóa "${subject}"`, 'error');
         }
 
@@ -1416,7 +1352,6 @@ const stage =
         'Đã lưu ghi chú',
         'success'
     );
-       }
            async function refreshFromCloud() {
 
     await loadFromCloud();
@@ -1430,7 +1365,7 @@ const stage =
         'success'
     );
 }
-function showToast(message, type = 'success') {
+} function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.textContent = message;
