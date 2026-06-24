@@ -628,17 +628,70 @@ async function loadFromCloud(){
     }catch(err){
         console.error('loadFromCloud', err);
     }
+    async function loadScheduleCells(){
+
+    const { data, error } =
+        await supabaseClient
+            .from('schedule_cells')
+            .select('*');
+
+    if(error){
+        console.error(error);
+        return;
+    }
+
+    scheduleData = {};
+
+    data.forEach(row => {
+
+        scheduleData[row.cell_id] =
+            row.subject;
+
+    });
+
+    renderScheduleTable();
+    renderSubjects();
+    updateStats();
+}
+async function saveCell(cellId, subject){
+
+    const { error } =
+        await supabaseClient
+            .from('schedule_cells')
+            .upsert({
+                cell_id: cellId,
+                subject: subject
+            });
+
+    if(error){
+        console.error(error);
+    }
 }
 
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
+
     await loadFromCloud();
 
-    renderSubjects();
-    renderScheduleTable();
-    updateStats();
+    await loadScheduleCells();
 });
+    supabaseClient
+.channel('schedule-realtime')
+.on(
+    'postgres_changes',
+    {
+        event: '*',
+        schema: 'public',
+        table: 'schedule_cells'
+    },
+    async () => {
+
+        await loadScheduleCells();
+
+    }
+)
+.subscribe();
           
         // Storage functions
         function saveData() {
@@ -893,7 +946,7 @@ function teacherBusy(teacher, dayIndex, shiftIndex) {
     return false;
 }
 
-        function handleDrop(e) {
+        async function handleDrop(e) {
             e.preventDefault();
             e.currentTarget.classList.remove('drag-over');
             
@@ -944,10 +997,14 @@ if (
 
     scheduleData[cellId] = subject;
 
-    saveData();
-                saveToCloud();
-    renderScheduleTable();
+await saveCell(
+    cellId,
+    subject
+);
+
+renderScheduleTable();
 renderSubjects();
+updateStats();
 
     showToast(
         `Đã thêm "${subject}"`,
@@ -972,13 +1029,19 @@ renderSubjects();
             }
         }
 
-        function deleteCell(e, cellId) {
+        async function deleteCell(e, cellId) {
             e.stopPropagation();
             const subject = scheduleData[cellId];
-            delete scheduleData[cellId];
-            saveData();
-            saveToCloud();
-            renderScheduleTable();
+           delete scheduleData[cellId];
+
+await supabaseClient
+    .from('schedule_cells')
+    .delete()
+    .eq('cell_id', cellId);
+
+renderScheduleTable();
+renderSubjects();
+updateStats();
             showToast(`Đã xóa "${subject}"`, 'error');
         }
 
