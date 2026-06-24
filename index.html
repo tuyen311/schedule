@@ -628,6 +628,7 @@ async function loadFromCloud(){
     }catch(err){
         console.error('loadFromCloud', err);
     }
+     }
     async function loadScheduleCells(){
 
     const { data, error } =
@@ -1415,6 +1416,7 @@ const stage =
         'Đã lưu ghi chú',
         'success'
     );
+       }
            async function refreshFromCloud() {
 
     await loadFromCloud();
